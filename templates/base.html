@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% block title -%}
+{% if title %}
+    <title>{{ title }}</title>
+{% else %}
+    <title>Пусто</title>
+{% endif %}
+{% endblock %}
+</head>
+<body>
+{% block content -%}
+    <h1>This is a Main page</h1>
+{% endblock -%}
+</body>
+</html>
