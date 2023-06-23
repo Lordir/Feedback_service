@@ -1,6 +1,18 @@
 from flask import Flask, render_template, url_for
+from flask_sqlalchemy import SQLAlchemy
+import os
+from dotenv import load_dotenv
+from flask_migrate import Migrate
+from models import *
+
+load_dotenv()
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+migrate = Migrate(app, db)
 
 
 @app.route('/')
