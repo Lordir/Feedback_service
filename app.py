@@ -14,18 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
 
-
-@app.route('/')
-def main_page():
-    print(url_for("main_page"))
-    return render_template("main_page.html", title="Main")
-
-
-@app.route('/posts/<int:id>')
-def posts(id):
-    return f"Пользователь: {id}"
-    # return render_template("main_page.html", title="Profile")
-
+from views import *
 
 if __name__ == "__main__":
     app.run(debug=True)
