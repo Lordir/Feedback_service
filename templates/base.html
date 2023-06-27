@@ -11,7 +11,8 @@
 </head>
 <body>
 {% block content -%}
-    <h1>This is a Main page</h1>
+    <a href="{{ url_for('reviews_page') }}">Отзывы</a>
+    <a href="{{ url_for('profile_page') }}">Личный кабинет</a>
 {% endblock -%}
 </body>
 </html>

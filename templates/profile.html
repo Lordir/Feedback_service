@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<h1>Профиль пользователя: {{ name }}</h1>
+{% endblock %}
+
+{#
+{% if name %}
+    <p>User has some bookmarksp>
+{% endif %}
+        {{ "User is logged in" if loggedin }}
+        #}
