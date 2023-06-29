@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask import session
 
 db = SQLAlchemy()
 
@@ -11,6 +12,18 @@ class Users(db.Model):
 
     def __repr__(self):
         return f"<User {self.username}>"
+
+    def is_authenticated(self):
+        return True if session['logged_in'] else False
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
 
 
 class Reviews(db.Model):
