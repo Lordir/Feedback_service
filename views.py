@@ -18,6 +18,9 @@ def profile_page():
 
 @app.route('/login/', methods=('POST', 'GET'))
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -25,8 +28,8 @@ def login():
         user = db.session.execute(db.select(Users).filter_by(username=username)).scalar_one()
         if user and check_password_hash(user.password, password):
             session['logged_in'] = True
-            login_user(user)
-            return redirect(url_for('profile'))
+            login_user(user, remember=True)
+            return redirect(request.args.get("next") or url_for('profile'))
 
     return render_template("login.html", title="Авторизация")
 
