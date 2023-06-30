@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import session
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
@@ -14,7 +15,7 @@ class Users(db.Model):
         return f"<User {self.username}>"
 
     def is_authenticated(self):
-        return True if session['logged_in'] else False
+        return True
 
     def is_active(self):
         return True

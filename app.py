@@ -27,7 +27,8 @@ from views import *
 
 @login_manager.user_loader
 def load_user(id):
-    return Users.get(id)
+    user = db.session.execute(db.select(Users).filter_by(id=id)).scalar_one()
+    return user
 
 
 if __name__ == "__main__":
