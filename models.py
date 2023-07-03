@@ -12,7 +12,7 @@ class Users(db.Model):
     reviews = db.relationship('Reviews', backref='users')
 
     def __repr__(self):
-        return f"<User {self.username}>"
+        return f"User {self.username}"
 
     def is_authenticated(self):
         return True
@@ -36,7 +36,7 @@ class Reviews(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def __repr__(self):
-        return f"<Review {self.title} - {self.rating}>"
+        return f"{self.title} - {self.rating}"
 
 
 class Category(db.Model):
@@ -45,4 +45,4 @@ class Category(db.Model):
     review_id = db.relationship('Reviews', backref='category')
 
     def __repr__(self):
-        return f"<Category {self.title}>"
+        return f"{self.title}"

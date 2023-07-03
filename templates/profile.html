@@ -2,12 +2,6 @@
 
 {% block content %}
 {{ super() }}
+<a href="{{ url_for('logout') }}">Выйти</a>
 <h1>Профиль пользователя: {{ current_user.username }}</h1>
 {% endblock %}
-
-{#
-{% if name %}
-    <p>User has some bookmarksp>
-{% endif %}
-        {{ "User is logged in" if loggedin }}
-        #}

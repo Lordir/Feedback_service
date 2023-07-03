@@ -2,9 +2,9 @@
 
 {% block content %}
 {{ super() }}
-{#
-{% for user in user_list %}
-    <li>{{ user }}li>
-        {% endfor %}
-        #}
+<a href="{{ url_for('add_review') }}">Добавить отзыв</a>
+
+{% for r in reviews %}
+               <a href="{{ url_for('review', id=r.id) }}"><h1>{{ r }}</h1></a>
+{% endfor %}
 {% endblock %}

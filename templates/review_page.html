@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<title>{{ review.title }}</title>
+<h1>ID: {{ review.id }}</h1>
+<h1>Название: {{ review.title }}</h1>
+<h1>Оценка: {{ review.rating }}</h1>
+<h1>Отзыв: {{ review.review_text }}</h1>
+<h1>Категория: {{ review.category_id }}</h1>
+{% endblock %}

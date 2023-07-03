@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<a href="{{ url_for('add_category') }}">Добавить категорию</a>
+<form method="POST" action="/add_review">
+    {{ form.hidden_tag() }}
+    {{ form.title.label }} {{ form.title() }}
+    {{ form.rating.label }} {{ form.rating() }}
+    {{ form.review_text.label }} {{ form.review_text() }}
+    {{ form.category.label }} {{ form.category() }}
+    {{ form.submit() }}
+</form>
+{% endblock %}

@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from app import app
 from models import *
-from forms import LoginForm, RegisterForm
+from forms import LoginForm, RegisterForm, CategoryForm, ReviewForm
 
 
 @app.route('/')
@@ -67,14 +67,62 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/add_review/', methods=('POST', 'GET'))
+@login_required
+def add_review():
+    form = ReviewForm()
+    categories = list(db.session.execute(db.select(Category.title)).scalars())
+
+    if len(categories) > 0:
+        form.category.choices = categories
+    else:
+        form.category.choices = 'Нет категорий'
+    user = current_user.id
+    if form.validate_on_submit():
+        try:
+            # В следующей строке берется id выбранной категории
+            select_category = db.session.execute(db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
+            new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
+                                 category_id=select_category, user_id=user)
+            db.session.add(new_review)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+        return redirect(url_for('reviews_page'))
+
+    return render_template("add_review.html", title="Добавление отзыва", form=form)
+
+
+@app.route('/add_category/', methods=('POST', 'GET'))
+@login_required
+def add_category():
+    form = CategoryForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        try:
+            category = Category(title=title)
+            db.session.add(category)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+        return redirect(url_for('add_review'))
+
+    return render_template("add_category.html", title="Добавление категории", form=form)
+
+
 @app.route('/reviews/')
 @login_required
 def reviews_page():
-    return render_template("reviews.html", title="Отзывы")
+    reviews = list(db.session.execute(db.select(Reviews)).scalars())
+
+    return render_template("reviews.html", title="Отзывы", reviews=reviews)
 
 
 @app.route('/review/<int:id>/')
 @login_required
 def review(id):
-    return f"Отзыв ID: {id}"
-    # return render_template("main_page.html", title="Profile")
+    select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
+    print(select_review.id)
+    return render_template("review_page.html", review=select_review)
