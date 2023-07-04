@@ -8,4 +8,8 @@
 <h1>Оценка: {{ review.rating }}</h1>
 <h1>Отзыв: {{ review.review_text }}</h1>
 <h1>Категория: {{ review.category_id }}</h1>
+<form action="{{ url_for('review_delete', id=review.id) }}" method="post"
+onsubmit="return confirm('Вы действительно хотите удалить этот отзыв?');">
+<input type="submit" value="Удалить">
+</form>
 {% endblock %}

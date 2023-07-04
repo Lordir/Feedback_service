@@ -81,7 +81,8 @@ def add_review():
     if form.validate_on_submit():
         try:
             # В следующей строке берется id выбранной категории
-            select_category = db.session.execute(db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
+            select_category = db.session.execute(
+                db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
             new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
                                  category_id=select_category, user_id=user)
             db.session.add(new_review)
@@ -124,5 +125,17 @@ def reviews_page():
 @login_required
 def review(id):
     select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
-    print(select_review.id)
+
     return render_template("review_page.html", review=select_review)
+
+
+@app.route('/review/<int:id>/delete/', methods=['POST'])
+@login_required
+def review_delete(id):
+    select_review_for_delete = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
+    db.session.delete(select_review_for_delete)
+    db.session.commit()
+    return redirect(url_for('reviews_page'))
+
+
+# добавить отображение отзывов по категориям, сортировки по оценке
