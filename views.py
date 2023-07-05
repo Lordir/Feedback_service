@@ -116,7 +116,8 @@ def add_category():
 @app.route('/reviews/')
 @login_required
 def reviews_page():
-    reviews = list(db.session.execute(db.select(Reviews)).scalars())
+    user = db.session.execute(db.select(Users).filter_by(id=current_user.id)).scalar_one()
+    reviews = user.reviews
     category = list(db.session.execute(db.select(Category)).scalars())
 
     return render_template("reviews.html", title="Отзывы", reviews=reviews, category=category)
@@ -125,9 +126,13 @@ def reviews_page():
 @app.route('/review/<int:id>/')
 @login_required
 def review(id):
-    select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
-
-    return render_template("review_page.html", title=select_review.title, review=select_review)
+    try:
+        select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
+        if select_review.user_id == current_user.id:
+            return render_template("review_page.html", title=select_review.title, review=select_review)
+    except:
+        return render_template('404.html')
+    return render_template('404.html')
 
 
 @app.route('/review/<int:id>/delete/', methods=['POST'])
@@ -142,10 +147,16 @@ def review_delete(id):
 @app.route('/category/<int:id>/')
 @login_required
 def category(id):
-    select_category = db.session.execute(db.select(Category).filter_by(id=id)).scalar_one()
-    category_reviews = select_category.review_id
+    try:
+        select_category = db.session.execute(db.select(Category).filter_by(id=id)).scalar_one()
+        category_reviews = select_category.review_id
+        category_reviews_at_current_user = []
+        for element in category_reviews:
+            if element.user_id == current_user.id:
+                category_reviews_at_current_user.append(element)
 
-    return render_template("category.html", title=select_category.title, category=select_category,
-                           reviews=category_reviews)
-
-# добавить сортировки по оценке, редактирование отзывов, категории и отзывы для каждого аккаунта отображать только свои
+        return render_template("category.html", title=select_category.title, category=select_category,
+                               reviews=category_reviews_at_current_user)
+    except:
+        return render_template('404.html')
+# добавить сортировки по оценке, редактирование отзывов, отзывы для каждого аккаунта отображать только свои

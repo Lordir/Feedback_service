@@ -1,6 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import session
-from flask_login import UserMixin
 
 db = SQLAlchemy()
 
