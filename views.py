@@ -1,3 +1,4 @@
+import operator
 from flask import render_template, url_for, request, session, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
@@ -123,6 +124,28 @@ def reviews_page():
     return render_template("reviews.html", title="Отзывы", reviews=reviews, category=category)
 
 
+@app.route('/reviews/descending_sort_rating/')
+@login_required
+def reviews_descending_sort_rating():
+    user = db.session.execute(db.select(Users).filter_by(id=current_user.id)).scalar_one()
+    reviews = user.reviews
+    sort_reviews = sorted(reviews, key=operator.attrgetter('rating'))
+    category = list(db.session.execute(db.select(Category)).scalars())
+
+    return render_template("reviews.html", title="Отзывы", reviews=sort_reviews, category=category)
+
+
+@app.route('/reviews/ascending_sort_rating/')
+@login_required
+def reviews_ascending_sort_rating():
+    user = db.session.execute(db.select(Users).filter_by(id=current_user.id)).scalar_one()
+    reviews = user.reviews
+    sort_reviews = sorted(reviews, key=operator.attrgetter('rating'), reverse=True)
+    category = list(db.session.execute(db.select(Category)).scalars())
+
+    return render_template("reviews.html", title="Отзывы", reviews=sort_reviews, category=category)
+
+
 @app.route('/review/<int:id>/')
 @login_required
 def review(id):
@@ -133,6 +156,31 @@ def review(id):
     except:
         return render_template('404.html')
     return render_template('404.html')
+
+# wtform put
+
+# @app.route('/review/<int:id>/update', methods=('PUT', 'GET'))
+# @login_required
+# def review_update(id):
+#     try:
+#         select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
+#         form = ReviewForm()
+#         if form.validate_on_submit():
+#             try:
+#                 # В следующей строке берется id выбранной категории
+#                 select_category = db.session.execute(
+#                     db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
+#                 new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
+#                                      category_id=select_category)
+#                 db.session.add(new_review)
+#                 db.session.commit()
+#             except:
+#                 db.session.rollback()
+#         if select_review.user_id == current_user.id:
+#             return render_template("review_page.html", title=select_review.title, review=select_review)
+#     except:
+#         return render_template('404.html')
+#     return render_template('404.html')
 
 
 @app.route('/review/<int:id>/delete/', methods=['POST'])
@@ -159,4 +207,41 @@ def category(id):
                                reviews=category_reviews_at_current_user)
     except:
         return render_template('404.html')
-# добавить сортировки по оценке, редактирование отзывов, отзывы для каждого аккаунта отображать только свои
+
+
+@app.route('/category/<int:id>/descending_sort_rating/')
+@login_required
+def category_descending_sort_rating(id):
+    try:
+        select_category = db.session.execute(db.select(Category).filter_by(id=id)).scalar_one()
+        category_reviews = select_category.review_id
+        category_reviews_at_current_user = []
+        for element in category_reviews:
+            if element.user_id == current_user.id:
+                category_reviews_at_current_user.append(element)
+        sort_reviews = sorted(category_reviews_at_current_user, key=operator.attrgetter('rating'))
+
+        return render_template("category.html", title=select_category.title, category=select_category,
+                               reviews=sort_reviews)
+    except:
+        return render_template('404.html')
+
+
+@app.route('/category/<int:id>/ascending_sort_rating/')
+@login_required
+def category_ascending_sort_rating(id):
+    try:
+        select_category = db.session.execute(db.select(Category).filter_by(id=id)).scalar_one()
+        category_reviews = select_category.review_id
+        category_reviews_at_current_user = []
+        for element in category_reviews:
+            if element.user_id == current_user.id:
+                category_reviews_at_current_user.append(element)
+        sort_reviews = sorted(category_reviews_at_current_user, key=operator.attrgetter('rating'), reverse=True)
+
+        return render_template("category.html", title=select_category.title, category=select_category,
+                               reviews=sort_reviews)
+    except:
+        return render_template('404.html')
+
+# добавить редактирование отзывов

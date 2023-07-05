@@ -6,6 +6,8 @@
 {% for c in category %}
                <a href="{{ url_for('category', id=c.id) }}"><h2>{{ c }}</h2></a>
 {% endfor %}
+<a href="{{ url_for('reviews_ascending_sort_rating') }}"><h3>Сортировать по возрастанию оценки </h3></a>
+<a href="{{ url_for('reviews_descending_sort_rating') }}"><h3>Сортировать по убыванию оценки </h3></a>
 {% for r in reviews %}
                <a href="{{ url_for('review', id=r.id) }}"><h1>{{ r }}</h1></a>
 {% endfor %}
