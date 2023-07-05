@@ -117,8 +117,9 @@ def add_category():
 @login_required
 def reviews_page():
     reviews = list(db.session.execute(db.select(Reviews)).scalars())
+    category = list(db.session.execute(db.select(Category)).scalars())
 
-    return render_template("reviews.html", title="Отзывы", reviews=reviews)
+    return render_template("reviews.html", title="Отзывы", reviews=reviews, category=category)
 
 
 @app.route('/review/<int:id>/')
@@ -126,7 +127,7 @@ def reviews_page():
 def review(id):
     select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
 
-    return render_template("review_page.html", review=select_review)
+    return render_template("review_page.html", title=select_review.title, review=select_review)
 
 
 @app.route('/review/<int:id>/delete/', methods=['POST'])
@@ -138,4 +139,13 @@ def review_delete(id):
     return redirect(url_for('reviews_page'))
 
 
-# добавить отображение отзывов по категориям, сортировки по оценке
+@app.route('/category/<int:id>/')
+@login_required
+def category(id):
+    select_category = db.session.execute(db.select(Category).filter_by(id=id)).scalar_one()
+    category_reviews = select_category.review_id
+
+    return render_template("category.html", title=select_category.title, category=select_category,
+                           reviews=category_reviews)
+
+# добавить сортировки по оценке, редактирование отзывов, категории и отзывы для каждого аккаунта отображать только свои

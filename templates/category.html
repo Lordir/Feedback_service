@@ -2,11 +2,12 @@
 
 {% block content %}
 {{ super() }}
-<a href="{{ url_for('add_review') }}">Добавить отзыв</a>
-{% for c in category %}
-               <a href="{{ url_for('category', id=c.id) }}"><h2>{{ c }}</h2></a>
-{% endfor %}
+<h1>Выбранная категория: {{ category.title }}</h1>
+{% if reviews %}
 {% for r in reviews %}
                <a href="{{ url_for('review', id=r.id) }}"><h1>{{ r }}</h1></a>
 {% endfor %}
+{% else %}
+<h2>В данной категории ещё нет отзывов</h2>
+{% endif %}
 {% endblock %}
