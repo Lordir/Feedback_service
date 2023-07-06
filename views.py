@@ -157,30 +157,38 @@ def review(id):
         return render_template('404.html')
     return render_template('404.html')
 
-# wtform put
 
-# @app.route('/review/<int:id>/update', methods=('PUT', 'GET'))
-# @login_required
-# def review_update(id):
-#     try:
-#         select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
-#         form = ReviewForm()
-#         if form.validate_on_submit():
-#             try:
-#                 # В следующей строке берется id выбранной категории
-#                 select_category = db.session.execute(
-#                     db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
-#                 new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
-#                                      category_id=select_category)
-#                 db.session.add(new_review)
-#                 db.session.commit()
-#             except:
-#                 db.session.rollback()
-#         if select_review.user_id == current_user.id:
-#             return render_template("review_page.html", title=select_review.title, review=select_review)
-#     except:
-#         return render_template('404.html')
-#     return render_template('404.html')
+@app.route('/review/<int:id>/update', methods=('POST', 'GET'))
+@login_required
+def review_update(id):
+    try:
+        select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
+        categories = list(db.session.execute(db.select(Category.title)).scalars())
+        form = ReviewForm(obj=select_review)
+        if len(categories) > 0:
+            form.category.choices = categories
+        else:
+            form.category.choices = 'Нет категорий'
+        if form.validate_on_submit():
+            try:
+                # В следующей строке берется id выбранной категории
+                select_category = db.session.execute(
+                    db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
+
+                select_review.title = form.title.data
+                select_review.rating = form.rating.data
+                select_review.review_text = form.review_text.data
+                select_review.category_id = select_category
+
+                db.session.add(select_review)
+                db.session.commit()
+            except:
+                db.session.rollback()
+        if select_review.user_id == current_user.id:
+            return render_template("review_update.html", title=select_review.title, form=form, review=select_review)
+    except:
+        return render_template('404.html')
+    return render_template('404.html')
 
 
 @app.route('/review/<int:id>/delete/', methods=['POST'])
