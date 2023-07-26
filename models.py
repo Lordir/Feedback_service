@@ -8,6 +8,7 @@ class Users(db.Model):
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(500), nullable=True)
     reviews = db.relationship('Reviews', backref='users')
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f"User {self.username}"
