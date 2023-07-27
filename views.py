@@ -252,4 +252,3 @@ def category_ascending_sort_rating(id):
     except:
         return render_template('404.html')
 
-# добавить редактирование отзывов

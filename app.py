@@ -24,6 +24,7 @@ login_manager.login_view = 'login'
 login_manager.login_message = "Авторизуйтесь для доступа"
 
 from views import *
+from api_views import *
 
 
 @login_manager.user_loader

@@ -37,6 +37,9 @@ class Reviews(db.Model):
     def __repr__(self):
         return f"{self.title} - {self.rating}"
 
+    def serialize(self):
+        return {'id': self.id, 'title': self.title, 'rating': self.rating, 'review_text': self.review_text}
+
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
