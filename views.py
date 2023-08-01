@@ -52,9 +52,9 @@ def register():
             user = Users(username=username, password=hashed_password)
             db.session.add(user)
             db.session.commit()
+            session['logged_in'] = True
         except:
             db.session.rollback()
-        session['logged_in'] = True
 
         return redirect(url_for('profile_page'))
 
