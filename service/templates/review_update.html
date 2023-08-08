@@ -2,7 +2,7 @@
 
 {% block content %}
 {{ super() }}
-<form method="POST" action="{{ url_for('review_update', id=review.id) }}">
+<form method="POST" action="{{ url_for('views.review_update', id=review.id) }}">
     {{ form.hidden_tag() }}
     {{ form.title.label }} {{ form.title() }}
     {{ form.rating.label }} {{ form.rating() }}

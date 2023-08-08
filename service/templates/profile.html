@@ -2,6 +2,6 @@
 
 {% block content %}
 {{ super() }}
-<a href="{{ url_for('logout') }}">Выйти</a>
+<a href="{{ url_for('views.logout') }}">Выйти</a>
 <h1>Профиль пользователя: {{ current_user.username }}</h1>
 {% endblock %}

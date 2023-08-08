@@ -1,27 +1,29 @@
 import operator
-from flask import render_template, url_for, request, session, redirect
+from flask import render_template, url_for, request, session, redirect, Blueprint
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
-from app import app
-from models import *
-from forms import LoginForm, RegisterForm, CategoryForm, ReviewForm
+# from service import app
+from .models import *
+from .forms import LoginForm, RegisterForm, CategoryForm, ReviewForm
+
+bp = Blueprint('views', __name__)
 
 
-@app.route('/')
+@bp.route('/')
 def main_page():
     return render_template("main_page.html", title="Главная страница")
 
 
-@app.route('/profile/')
+@bp.route('/profile/')
 @login_required
 def profile_page():
     return render_template("profile.html", title="Профиль")
 
 
-@app.route('/login/', methods=('POST', 'GET'))
+@bp.route('/login/', methods=('POST', 'GET'))
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('profile_page'))
+        return redirect(url_for('views.profile_page'))
 
     form = LoginForm()
 
@@ -33,16 +35,16 @@ def login():
             if user and check_password_hash(user.password, password):
                 session['logged_in'] = True
                 login_user(user, remember=True)
-                app.logger.info(f"Пользователь {current_user.username} вошел в аккаунт")
+                # app.logger.info(f"Пользователь {current_user.username} вошел в аккаунт")
 
-                return redirect(request.args.get("next") or url_for('profile_page'))
+                return redirect(request.args.get("next") or url_for('views.profile_page'))
         except:
             return render_template("login.html", title="Авторизация", form=form)
 
     return render_template("login.html", title="Авторизация", form=form)
 
 
-@app.route('/register/', methods=('POST', 'GET'))
+@bp.route('/register/', methods=('POST', 'GET'))
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -59,20 +61,20 @@ def register():
         except:
             db.session.rollback()
 
-        return redirect(url_for('profile_page'))
+        return redirect(url_for('views.profile_page'))
 
     return render_template("register.html", title="Регистрация", form=form)
 
 
-@app.route('/logout/')
+@bp.route('/logout/')
 @login_required
 def logout():
-    app.logger.info(f"Пользователь {current_user.username} вышел из аккаунта")
+    # app.logger.info(f"Пользователь {current_user.username} вышел из аккаунта")
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('views.login'))
 
 
-@app.route('/add_review/', methods=('POST', 'GET'))
+@bp.route('/add_review/', methods=('POST', 'GET'))
 @login_required
 def add_review():
     form = ReviewForm()
@@ -92,17 +94,17 @@ def add_review():
                                  category_id=select_category, user_id=user)
             db.session.add(new_review)
             db.session.commit()
-            app.logger.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
+            # app.logger.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
         except:
             db.session.rollback()
-            app.logger.info(f"У пользователя {current_user.username} не удалось добавить отзыв")
+            # app.logger.info(f"У пользователя {current_user.username} не удалось добавить отзыв")
 
-        return redirect(url_for('reviews_page'))
+        return redirect(url_for('views.reviews_page'))
 
     return render_template("add_review.html", title="Добавление отзыва", form=form)
 
 
-@app.route('/add_category/', methods=('POST', 'GET'))
+@bp.route('/add_category/', methods=('POST', 'GET'))
 @login_required
 def add_category():
     form = CategoryForm()
@@ -112,17 +114,17 @@ def add_category():
             category = Category(title=title)
             db.session.add(category)
             db.session.commit()
-            app.logger.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
+            # app.logger.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
         except:
             db.session.rollback()
-            app.logger.info(f"У пользователя {current_user.username} не удалось добавить категорию")
+            # app.logger.info(f"У пользователя {current_user.username} не удалось добавить категорию")
 
-        return redirect(url_for('add_review'))
+        return redirect(url_for('views.add_review'))
 
     return render_template("add_category.html", title="Добавление категории", form=form)
 
 
-@app.route('/reviews/')
+@bp.route('/reviews/')
 @login_required
 def reviews_page():
     user = db.session.execute(db.select(Users).filter_by(id=current_user.id)).scalar_one()
@@ -132,7 +134,7 @@ def reviews_page():
     return render_template("reviews.html", title="Отзывы", reviews=reviews, category=category)
 
 
-@app.route('/reviews/descending_sort_rating/')
+@bp.route('/reviews/descending_sort_rating/')
 @login_required
 def reviews_descending_sort_rating():
     user = db.session.execute(db.select(Users).filter_by(id=current_user.id)).scalar_one()
@@ -143,7 +145,7 @@ def reviews_descending_sort_rating():
     return render_template("reviews.html", title="Отзывы", reviews=sort_reviews, category=category)
 
 
-@app.route('/reviews/ascending_sort_rating/')
+@bp.route('/reviews/ascending_sort_rating/')
 @login_required
 def reviews_ascending_sort_rating():
     user = db.session.execute(db.select(Users).filter_by(id=current_user.id)).scalar_one()
@@ -154,7 +156,7 @@ def reviews_ascending_sort_rating():
     return render_template("reviews.html", title="Отзывы", reviews=sort_reviews, category=category)
 
 
-@app.route('/review/<int:id>/')
+@bp.route('/review/<int:id>/')
 @login_required
 def review(id):
     try:
@@ -166,7 +168,7 @@ def review(id):
     return render_template('404.html')
 
 
-@app.route('/review/<int:id>/update', methods=('POST', 'GET'))
+@bp.route('/review/<int:id>/update', methods=('POST', 'GET'))
 @login_required
 def review_update(id):
     try:
@@ -190,11 +192,11 @@ def review_update(id):
 
                 db.session.add(select_review)
                 db.session.commit()
-                app.logger.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
+                # app.logger.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
             except:
                 db.session.rollback()
-                app.logger.info(
-                    f"У пользователя {current_user.username} не удалось обновить отзыв {select_review.title}")
+                # app.logger.info(
+                #     f"У пользователя {current_user.username} не удалось обновить отзыв {select_review.title}")
         if select_review.user_id == current_user.id:
             return render_template("review_update.html", title=select_review.title, form=form, review=select_review)
     except:
@@ -202,17 +204,17 @@ def review_update(id):
     return render_template('404.html')
 
 
-@app.route('/review/<int:id>/delete/', methods=['POST'])
+@bp.route('/review/<int:id>/delete/', methods=['POST'])
 @login_required
 def review_delete(id):
     select_review_for_delete = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
     db.session.delete(select_review_for_delete)
     db.session.commit()
-    app.logger.info(f"Пользователь {current_user.username} удалил отзыв: {select_review_for_delete.title}")
-    return redirect(url_for('reviews_page'))
+    # app.logger.info(f"Пользователь {current_user.username} удалил отзыв: {select_review_for_delete.title}")
+    return redirect(url_for('views.reviews_page'))
 
 
-@app.route('/category/<int:id>/')
+@bp.route('/category/<int:id>/')
 @login_required
 def category(id):
     try:
@@ -229,7 +231,7 @@ def category(id):
         return render_template('404.html')
 
 
-@app.route('/category/<int:id>/descending_sort_rating/')
+@bp.route('/category/<int:id>/descending_sort_rating/')
 @login_required
 def category_descending_sort_rating(id):
     try:
@@ -247,7 +249,7 @@ def category_descending_sort_rating(id):
         return render_template('404.html')
 
 
-@app.route('/category/<int:id>/ascending_sort_rating/')
+@bp.route('/category/<int:id>/ascending_sort_rating/')
 @login_required
 def category_ascending_sort_rating(id):
     try:

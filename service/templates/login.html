@@ -2,7 +2,7 @@
 
 {% block content %}
 {{ super() }}
-<a href="{{ url_for('register') }}">Регистрация</a>
+<a href="{{ url_for('views.register') }}">Регистрация</a>
 <form method="POST" action="">
     {{ form.hidden_tag() }}
     {{ form.username.label }} {{ form.username() }}

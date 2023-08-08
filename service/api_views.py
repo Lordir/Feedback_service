@@ -1,11 +1,11 @@
 import json
 import operator
 
-from flask import render_template, request, session
+from flask import request, session
 from flask_login import login_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import app
+from service import app
 from models import *
 
 

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<a href="{{ url_for('views.add_review') }}">Добавить отзыв</a>
+{% for c in category %}
+               <a href="{{ url_for('views.category', id=c.id) }}"><h2>{{ c }}</h2></a>
+{% endfor %}
+<a href="{{ url_for('views.reviews_ascending_sort_rating') }}"><h3>Сортировать по возрастанию оценки </h3></a>
+<a href="{{ url_for('views.reviews_descending_sort_rating') }}"><h3>Сортировать по убыванию оценки </h3></a>
+{% for r in reviews %}
+               <a href="{{ url_for('views.review', id=r.id) }}"><h1>{{ r }}</h1></a>
+{% endfor %}
+{% endblock %}

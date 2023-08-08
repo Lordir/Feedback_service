@@ -2,7 +2,7 @@
 
 {% block content %}
 {{ super() }}
-<a href="{{ url_for('add_category') }}">Добавить категорию</a>
+<a href="{{ url_for('views.add_category') }}">Добавить категорию</a>
 <form method="POST" action="/add_review">
     {{ form.hidden_tag() }}
     {{ form.title.label }} {{ form.title() }}
