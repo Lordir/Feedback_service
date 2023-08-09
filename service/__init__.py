@@ -70,8 +70,9 @@ def create_app():
         user = db.session.execute(db.select(Users).filter_by(id=id)).scalar_one()
         return user
 
-    from . import views
+    from . import views, api_views
     app.register_blueprint(views.bp)
+    app.register_blueprint(api_views.bp)
     return app
 
 
