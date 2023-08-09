@@ -1,11 +1,12 @@
 import pytest
-from flask import Flask
+
+from service import create_app
 
 
 @pytest.fixture
 def app():
-    app = Flask(__name__)
-
+    app = create_app()
+    app.config.update({"TESTING": True, })
     yield app
 
 
