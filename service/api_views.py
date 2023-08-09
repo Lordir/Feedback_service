@@ -1,5 +1,7 @@
 import json
 import operator
+import logging
+
 
 from flask import request, session, Blueprint
 from flask_login import login_user, login_required, current_user
@@ -7,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .models import *
 
+LOG = logging.getLogger(__name__)
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
@@ -21,6 +24,7 @@ def reviews_api():
     result = json.dumps(result, ensure_ascii=False)
 
     return result
+
 
 @bp.route('/reviews/descending_sort_rating/')
 @login_required
@@ -73,7 +77,7 @@ def review_api(id):
             if select_review_for_delete.user_id == current_user.id:
                 db.session.delete(select_review_for_delete)
                 db.session.commit()
-                # app.logger.info(f"Пользователь {current_user.username} удалил отзыв {select_review_for_delete.title}")
+                LOG.info(f"Пользователь {current_user.username} удалил отзыв {select_review_for_delete.title}")
                 return json.dumps({"Ответ": "Отзыв удален"}, ensure_ascii=False)
             else:
                 return json.dumps({"Ответ": "У вас нет прав для удаления этого отзыва"}, ensure_ascii=False)
@@ -96,7 +100,7 @@ def review_api(id):
 
                 db.session.add(select_review)
                 db.session.commit()
-                # app.logger.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
+                LOG.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
                 return json.dumps({"Ответ": "Отзыв обновлен"}, ensure_ascii=False)
 
             else:
@@ -187,7 +191,7 @@ def login_api():
         if user and check_password_hash(user.password, password):
             session['logged_in'] = True
             login_user(user, remember=True)
-            # app.logger.info(f"Пользователь {current_user.username} вошел в аккаунт")
+            LOG.info(f"Пользователь {current_user.username} вошел в аккаунт")
             return json.dumps({"Ответ": "Успешно"}, ensure_ascii=False)
     except:
         return json.dumps({"Ответ": "Неверные данные или ошибка"}, ensure_ascii=False)
@@ -210,7 +214,7 @@ def register_api():
         db.session.add(user)
         db.session.commit()
         session['logged_in'] = True
-        # app.logger.info(f"Прошел регистрацию пользователь {user.username}")
+        LOG.info(f"Прошел регистрацию пользователь {user.username}")
         return json.dumps({"Ответ": "Успешно"}, ensure_ascii=False)
     except:
         db.session.rollback()
@@ -229,7 +233,7 @@ def add_review_api():
                              review_text=request_data['review_text'], category_id=id_category, user_id=user)
         db.session.add(new_review)
         db.session.commit()
-        # app.logger.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
+        LOG.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
         return json.dumps({"Ответ": "Отзыв добавлен"}, ensure_ascii=False)
     except:
         db.session.rollback()
@@ -247,7 +251,7 @@ def add_category_api():
         category = Category(title=request_data['title'])
         db.session.add(category)
         db.session.commit()
-        # app.logger.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
+        LOG.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
         return json.dumps({"Ответ": "Категория добавлена"}, ensure_ascii=False)
     except:
         db.session.rollback()

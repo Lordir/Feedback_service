@@ -1,6 +1,5 @@
-from flask_admin import Admin
-from flask import Flask, render_template, url_for
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
+import logging
 import os
 from dotenv import load_dotenv
 from flask_migrate import Migrate
@@ -49,13 +48,16 @@ def create_app():
 
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'views.login'
     login_manager.login_message = "Авторизуйтесь для доступа"
 
     admin = Admin(app, name='Feedback service admin', template_mode='bootstrap3')
     admin.add_view(MainModelView(Users, db.session))
     admin.add_view(ReviewsModelView(Reviews, db.session))
     admin.add_view(MainModelView(Category, db.session))
+
+    logging.basicConfig(level=logging.DEBUG)
+    logging.getLogger('werkzeug').setLevel(logging.INFO)
 
     try:
         os.makedirs(app.instance_path)

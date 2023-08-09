@@ -1,11 +1,13 @@
 import operator
+import logging
 from flask import render_template, url_for, request, session, redirect, Blueprint
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
-# from service import app
+
 from .models import *
 from .forms import LoginForm, RegisterForm, CategoryForm, ReviewForm
 
+LOG = logging.getLogger(__name__)
 bp = Blueprint('views', __name__)
 
 
@@ -35,7 +37,7 @@ def login():
             if user and check_password_hash(user.password, password):
                 session['logged_in'] = True
                 login_user(user, remember=True)
-                # app.logger.info(f"Пользователь {current_user.username} вошел в аккаунт")
+                LOG.info(f"Пользователь {current_user.username} вошел в аккаунт")
 
                 return redirect(request.args.get("next") or url_for('views.profile_page'))
         except:
@@ -57,7 +59,7 @@ def register():
             db.session.add(user)
             db.session.commit()
             session['logged_in'] = True
-            app.logger.info(f"Прошел регистрацию пользователь {user.username}")
+            LOG.info(f"Прошел регистрацию пользователь {user.username}")
         except:
             db.session.rollback()
 
@@ -69,7 +71,7 @@ def register():
 @bp.route('/logout/')
 @login_required
 def logout():
-    # app.logger.info(f"Пользователь {current_user.username} вышел из аккаунта")
+    LOG.info(f"Пользователь {current_user.username} вышел из аккаунта")
     logout_user()
     return redirect(url_for('views.login'))
 
@@ -85,19 +87,25 @@ def add_review():
     else:
         form.category.choices = 'Нет категорий'
     user = current_user.id
+    print("1")
     if form.validate_on_submit():
         try:
+            print("form ok")
             # В следующей строке берется id выбранной категории
             select_category = db.session.execute(
                 db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
             new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
                                  category_id=select_category, user_id=user)
+            print(new_review.title, new_review.rating, new_review.review_text, new_review.category_id, new_review.user_id)
             db.session.add(new_review)
+            print(db.session.new_review)
             db.session.commit()
-            # app.logger.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
+            print("ok", db.session)
+            LOG.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
         except:
+            print("not ok", db.session)
             db.session.rollback()
-            # app.logger.info(f"У пользователя {current_user.username} не удалось добавить отзыв")
+            LOG.info(f"У пользователя {current_user.username} не удалось добавить отзыв")
 
         return redirect(url_for('views.reviews_page'))
 
@@ -114,10 +122,10 @@ def add_category():
             category = Category(title=title)
             db.session.add(category)
             db.session.commit()
-            # app.logger.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
+            LOG.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
         except:
             db.session.rollback()
-            # app.logger.info(f"У пользователя {current_user.username} не удалось добавить категорию")
+            LOG.info(f"У пользователя {current_user.username} не удалось добавить категорию")
 
         return redirect(url_for('views.add_review'))
 
@@ -192,11 +200,11 @@ def review_update(id):
 
                 db.session.add(select_review)
                 db.session.commit()
-                # app.logger.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
+                LOG.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
             except:
                 db.session.rollback()
-                # app.logger.info(
-                #     f"У пользователя {current_user.username} не удалось обновить отзыв {select_review.title}")
+                LOG.info(
+                    f"У пользователя {current_user.username} не удалось обновить отзыв {select_review.title}")
         if select_review.user_id == current_user.id:
             return render_template("review_update.html", title=select_review.title, form=form, review=select_review)
     except:
@@ -210,7 +218,7 @@ def review_delete(id):
     select_review_for_delete = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
     db.session.delete(select_review_for_delete)
     db.session.commit()
-    # app.logger.info(f"Пользователь {current_user.username} удалил отзыв: {select_review_for_delete.title}")
+    LOG.info(f"Пользователь {current_user.username} удалил отзыв: {select_review_for_delete.title}")
     return redirect(url_for('views.reviews_page'))
 
 
