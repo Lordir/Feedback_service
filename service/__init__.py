@@ -34,9 +34,12 @@ dictConfig({
 })
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+    if test_config is None:
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['TEST_DATABASE_URL']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
@@ -45,6 +48,7 @@ def create_app():
 
     db.init_app(app)
     migrate = Migrate(app, db)
+    migrate.init_app(app, db)
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -63,9 +67,6 @@ def create_app():
         os.makedirs(app.instance_path)
     except OSError:
         pass
-
-    # from service import views
-    # from api_views import *
 
     @login_manager.user_loader
     def load_user(id):
