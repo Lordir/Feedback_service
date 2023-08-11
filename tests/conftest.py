@@ -9,6 +9,7 @@ from service.models import db
 def app():
     app = create_app(test_config=True)
     app.config.update({"TESTING": True, })
+    app.config['WTF_CSRF_ENABLED'] = False
 
     # app_context = app.app_context()
     # app_context.push()
@@ -33,35 +34,21 @@ def client(app):
 def runner(app):
     return app.test_cli_runner()
 
-# @pytest.fixture(scope="session")
-# def db(app, request):
-#     """Session-wide test database."""
-#
-#     def teardown():
-#         _db.drop_all()
-#
-#     _db.app = app
-#
-#     flask_migrate_upgrade(directory='migrations')
-#     request.addfinalizer(teardown)
-#     return _db
-#
-#
-# @pytest.fixture(scope="function")
-# def session(db, request):
-#     db.session.begin_nested()
-#
-#     def commit():
-#         db.session.flush()
-#         # patch commit method
-#
-#     old_commit = db.session.commit
-#     db.session.commit = commit
-#
-#     def teardown():
-#         db.session.rollback()
-#         db.session.close()
-#         db.session.commit = old_commit
-#
-#     request.addfinalizer(teardown)
-#     return db.session
+
+class AuthActions(object):
+    def __init__(self, client):
+        self._client = client
+
+    def login(self, username='test', password='password'):
+        return self._client.post(
+            '/api/login/',
+            json={'username': username, 'password': password}
+        )
+
+    def logout(self):
+        return self._client.get('/logout/')
+
+
+@pytest.fixture
+def auth(client):
+    return AuthActions(client)
