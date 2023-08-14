@@ -60,10 +60,9 @@ def register():
             db.session.commit()
             session['logged_in'] = True
             LOG.info(f"Прошел регистрацию пользователь {user.username}")
+            return redirect(url_for('views.profile_page'))
         except:
             db.session.rollback()
-
-        return redirect(url_for('views.profile_page'))
 
     return render_template("register.html", title="Регистрация", form=form)
 
@@ -96,7 +95,8 @@ def add_review():
                 db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
             new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
                                  category_id=select_category, user_id=user)
-            print(new_review.title, new_review.rating, new_review.review_text, new_review.category_id, new_review.user_id)
+            print(new_review.title, new_review.rating, new_review.review_text, new_review.category_id,
+                  new_review.user_id)
             db.session.add(new_review)
             print(db.session.new_review)
             db.session.commit()
@@ -123,11 +123,10 @@ def add_category():
             db.session.add(category)
             db.session.commit()
             LOG.info(f"Пользователь {current_user.username} успешно добавил категорию: {category.title}")
+            return redirect(url_for('views.add_review'))
         except:
             db.session.rollback()
             LOG.info(f"У пользователя {current_user.username} не удалось добавить категорию")
-
-        return redirect(url_for('views.add_review'))
 
     return render_template("add_category.html", title="Добавление категории", form=form)
 
@@ -181,31 +180,32 @@ def review(id):
 def review_update(id):
     try:
         select_review = db.session.execute(db.select(Reviews).filter_by(id=id)).scalar_one()
-        categories = list(db.session.execute(db.select(Category.title)).scalars())
-        form = ReviewForm(obj=select_review)
-        if len(categories) > 0:
-            form.category.choices = categories
-        else:
-            form.category.choices = 'Нет категорий'
-        if form.validate_on_submit():
-            try:
-                # В следующей строке берется id выбранной категории
-                select_category = db.session.execute(
-                    db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
-
-                select_review.title = form.title.data
-                select_review.rating = form.rating.data
-                select_review.review_text = form.review_text.data
-                select_review.category_id = select_category
-
-                db.session.add(select_review)
-                db.session.commit()
-                LOG.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
-            except:
-                db.session.rollback()
-                LOG.info(
-                    f"У пользователя {current_user.username} не удалось обновить отзыв {select_review.title}")
         if select_review.user_id == current_user.id:
+
+            categories = list(db.session.execute(db.select(Category.title)).scalars())
+            form = ReviewForm(obj=select_review)
+            if len(categories) > 0:
+                form.category.choices = categories
+            else:
+                form.category.choices = 'Нет категорий'
+            if form.validate_on_submit():
+                try:
+                    # В следующей строке берется id выбранной категории
+                    select_category = db.session.execute(
+                        db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
+
+                    select_review.title = form.title.data
+                    select_review.rating = form.rating.data
+                    select_review.review_text = form.review_text.data
+                    select_review.category_id = select_category
+
+                    db.session.add(select_review)
+                    db.session.commit()
+                    LOG.info(f"Пользователь {current_user.username} обновил отзыв {select_review.title}")
+                except:
+                    db.session.rollback()
+                    LOG.info(
+                        f"У пользователя {current_user.username} не удалось обновить отзыв {select_review.title}")
             return render_template("review_update.html", title=select_review.title, form=form, review=select_review)
     except:
         return render_template('404.html')
