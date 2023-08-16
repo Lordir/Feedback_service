@@ -20,7 +20,7 @@ def test_model_users(app):
         assert added_user.is_admin is False
         assert str(added_user) == "User test"
         assert added_user.is_authenticated() is True
-        assert added_user.get_id() == "1"
+        assert added_user.get_id() == "2"
 
 
 def test_model_category(app):
@@ -40,7 +40,7 @@ def test_model_category(app):
 
 
 def test_model_reviews(app):
-    review = Reviews(title="test", rating=3, review_text='', category_id=1, user_id=1)
+    review = Reviews(title="test", rating=3, review_text='', category_id=2, user_id=2)
 
     "Добавление отзыва БД"
     with app.app_context():

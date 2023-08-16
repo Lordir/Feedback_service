@@ -101,7 +101,7 @@ def test_view_reviews(client, auth):
 
 def test_review_id(client, auth):
     auth.login()
-    response = client.get('/review/1/')
+    response = client.get('/review/2/')
     assert "Название: test" in response.data.decode()
 
     "Проверка ввода несуществующего id"
@@ -111,21 +111,21 @@ def test_review_id(client, auth):
 
 def test_review_update(client, auth):
     auth.login()
-    response = client.get('/review/1/update')
+    response = client.get('/review/2/update')
     assert "test" in response.data.decode()
 
-    client.post('/review/1/update',
+    client.post('/review/2/update',
                 data={"title": "test99", "rating": 3, "review_text": "", "category_id": 1, "user_id": 1},
                 follow_redirects=True)
 
-    response2 = client.get('/review/1/update')
+    response2 = client.get('/review/2/update')
     assert "test99" in response2.data.decode()
 
     "При вводе некорректных данных ничего не обновится"
-    client.post('/review/1/update',
+    client.post('/review/2/update',
                 data={"title": "", "rating": 3, "review_text": "", "category_id": 1, "user_id": 1},
                 follow_redirects=True)
-    response3 = client.get('/review/1/update')
+    response3 = client.get('/review/2/update')
     assert "test99" in response3.data.decode()
 
     "Проверка ввода несуществующего id"
@@ -137,17 +137,17 @@ def test_review_update(client, auth):
 
 def test_view_category(client, auth):
     auth.login()
-    response = client.get('/category/1/')
+    response = client.get('/category/2/')
     assert "test99 - 3" in response.data.decode()
     response = client.get('/category/7575/')
     assert "Данная страница не существует или недоступна!" in response.data.decode()
 
-    response2 = client.get('/category/1/descending_sort_rating/')
+    response2 = client.get('/category/2/descending_sort_rating/')
     assert "test99 - 3" in response2.data.decode()
     response2 = client.get('/category/444/descending_sort_rating/')
     assert "Данная страница не существует или недоступна!" in response2.data.decode()
 
-    response3 = client.get('/category/1/ascending_sort_rating/')
+    response3 = client.get('/category/2/ascending_sort_rating/')
     assert "test99 - 3" in response3.data.decode()
     response3 = client.get('/category/666/ascending_sort_rating/')
     assert "Данная страница не существует или недоступна!" in response3.data.decode()

@@ -2,7 +2,6 @@ import json
 import operator
 import logging
 
-
 from flask import request, session, Blueprint
 from flask_login import login_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
