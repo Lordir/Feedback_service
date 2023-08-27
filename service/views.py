@@ -86,24 +86,18 @@ def add_review():
     else:
         form.category.choices = 'Нет категорий'
     user = current_user.id
-    print("1")
+
     if form.validate_on_submit():
         try:
-            print("form ok")
             # В следующей строке берется id выбранной категории
             select_category = db.session.execute(
                 db.select(Category.id).filter_by(title=form.category.data)).scalar_one()
             new_review = Reviews(title=form.title.data, rating=form.rating.data, review_text=form.review_text.data,
                                  category_id=select_category, user_id=user)
-            print(new_review.title, new_review.rating, new_review.review_text, new_review.category_id,
-                  new_review.user_id)
             db.session.add(new_review)
-            print(db.session.new_review)
             db.session.commit()
-            print("ok", db.session)
             LOG.info(f"Пользователь {current_user.username} успешно добавил отзыв: {new_review.title}")
         except:
-            print("not ok", db.session)
             db.session.rollback()
             LOG.info(f"У пользователя {current_user.username} не удалось добавить отзыв")
 
